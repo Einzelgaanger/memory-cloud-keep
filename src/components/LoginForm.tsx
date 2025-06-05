@@ -1,15 +1,16 @@
 
 import React, { useState } from 'react';
-import { Eye, EyeOff, Sparkles, Lock } from 'lucide-react';
+import { Eye, EyeOff, Sparkles, Lock, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface LoginFormProps {
-  onLogin: (password: string) => Promise<void>;
+  onLogin: (email: string, password: string) => Promise<void>;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,9 +22,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
     setIsLoading(true);
 
     try {
-      await onLogin(password);
+      await onLogin(email, password);
     } catch (err: any) {
-      setError('Invalid password. Please try again.');
+      setError('Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -51,11 +52,27 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             <div className="text-center space-y-2">
               <h3 className="text-lg font-semibold text-gray-800">Welcome Back, Alfred</h3>
               <p className="text-sm text-gray-600">
-                Enter your sacred key to access your inner world of thoughts and meaningful events
+                Enter your sacred credentials to access your inner world of thoughts and meaningful events
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Sacred Email
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email..."
+                  className="border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Lock className="w-4 h-4" />

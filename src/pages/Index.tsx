@@ -57,11 +57,11 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogin = async (password: string) => {
+  const handleLogin = async (email: string, password: string) => {
     try {
-      // Sign in with fixed email and provided password
+      // Try to sign in first
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: 'alfred@mulingediary.com',
+        email: email,
         password: password,
       });
 
@@ -69,7 +69,7 @@ const Index = () => {
         if (error.message.includes('Invalid login credentials')) {
           // If user doesn't exist, create account
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: 'alfred@mulingediary.com',
+            email: email,
             password: password,
             options: {
               data: {
@@ -99,7 +99,7 @@ const Index = () => {
       console.error('Login error:', error);
       toast({
         title: "Login failed",
-        description: error.message || "Please check your password and try again.",
+        description: error.message || "Please check your credentials and try again.",
         variant: "destructive",
       });
       throw error;

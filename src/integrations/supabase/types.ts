@@ -9,7 +9,111 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          attachments: string[] | null
+          created_at: string | null
+          date: string
+          description: string | null
+          id: string
+          notes: string | null
+          priority: string | null
+          requirements: string[] | null
+          status: string | null
+          time: string
+          title: string
+          updated_at: string | null
+          user_id: string
+          venue: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          created_at?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          requirements?: string[] | null
+          status?: string | null
+          time: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+          venue: string
+        }
+        Update: {
+          attachments?: string[] | null
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          requirements?: string[] | null
+          status?: string | null
+          time?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          venue?: string
+        }
+        Relationships: []
+      }
+      journal_entries: {
+        Row: {
+          attachments: string[] | null
+          content: string | null
+          created_at: string | null
+          id: string
+          mood: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          mood?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attachments?: string[] | null
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          mood?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
