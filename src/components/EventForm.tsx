@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, X, MapPin, Clock, Calendar, AlertCircle, FileText, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  venue: string;
+  requirements: string[];
+  notes: string;
+  priority: 'low' | 'medium' | 'high';
+  status: 'pending' | 'completed' | 'rescheduled';
+  attachments: string[];
+  created_at: string;
+  updated_at: string;
+}
 
 interface EventFormProps {
   onSave: (event: {
@@ -19,12 +35,14 @@ interface EventFormProps {
     requirements: string[];
     notes: string;
     priority: 'low' | 'medium' | 'high';
+    status: 'pending' | 'completed' | 'rescheduled';
     attachments: string[];
   }) => void;
   onCancel: () => void;
+  editingEvent?: Event | null;
 }
 
-const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
+const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel, editingEvent }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -34,12 +52,28 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
   const [newRequirement, setNewRequirement] = useState('');
   const [notes, setNotes] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [status, setStatus] = useState<'pending' | 'completed' | 'rescheduled'>('pending');
   const [attachments, setAttachments] = useState<string[]>([]);
 
+  useEffect(() => {
+    if (editingEvent) {
+      setTitle(editingEvent.title);
+      setDescription(editingEvent.description);
+      setDate(editingEvent.date);
+      setTime(editingEvent.time);
+      setVenue(editingEvent.venue);
+      setRequirements(editingEvent.requirements);
+      setNotes(editingEvent.notes);
+      setPriority(editingEvent.priority);
+      setStatus(editingEvent.status);
+      setAttachments(editingEvent.attachments);
+    }
+  }, [editingEvent]);
+
   const priorityOptions = [
-    { value: 'low', label: 'Low Priority', color: 'text-green-600' },
-    { value: 'medium', label: 'Medium Priority', color: 'text-yellow-600' },
-    { value: 'high', label: 'High Priority', color: 'text-red-600' }
+    { value: 'low', label: 'Low Priority', color: 'text-emerald-600' },
+    { value: 'medium', label: 'Medium Priority', color: 'text-amber-600' },
+    { value: 'high', label: 'High Priority', color: 'text-rose-600' }
   ];
 
   const handleAddRequirement = () => {
@@ -58,8 +92,8 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
     const fileNames = files.map(file => file.name);
     setAttachments([...attachments, ...fileNames]);
     toast({
-      title: "Files attached",
-      description: `${files.length} file(s) ready to upload to cloud storage.`,
+      title: "Files prepared",
+      description: `${files.length} file(s) ready for your sacred timeline.`,
     });
   };
 
@@ -67,7 +101,7 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
     e.preventDefault();
     if (!title.trim() || !date || !time || !venue.trim()) {
       toast({
-        title: "Missing information",
+        title: "Missing sacred details",
         description: "Please fill in the title, date, time, and venue.",
         variant: "destructive",
       });
@@ -83,23 +117,27 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
       requirements,
       notes: notes.trim(),
       priority,
+      status: editingEvent ? status : 'pending',
       attachments
     });
 
     toast({
-      title: "Event created!",
-      description: "Your event has been saved successfully.",
+      title: editingEvent ? "Event updated!" : "Event created!",
+      description: editingEvent ? "Your event has been updated in your timeline." : "A new moment has been added to your sacred timeline.",
     });
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <Card className="shadow-lg border-0 bg-white">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg">
+      <Card className="shadow-xl border-0 bg-white">
+        <CardHeader className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-t-lg">
           <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-            <Calendar className="w-7 h-7 text-blue-600" />
-            New Event
+            <Calendar className="w-7 h-7 text-indigo-600" />
+            {editingEvent ? 'Update Sacred Event' : 'New Sacred Event'}
           </CardTitle>
+          {editingEvent && (
+            <p className="text-sm text-gray-600 mt-1">Refining the details of your meaningful moment</p>
+          )}
         </CardHeader>
         
         <CardContent className="p-6">
@@ -113,8 +151,8 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter event title..."
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Enter your sacred event title..."
+                  className="border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
                   required
                 />
               </div>
@@ -125,7 +163,7 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
                   Priority
                 </label>
                 <Select value={priority} onValueChange={(value: 'low' | 'medium' | 'high') => setPriority(value)}>
-                  <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                  <SelectTrigger className="border-gray-200 focus:border-indigo-500 focus:ring-indigo-500">
                     <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
                   <SelectContent>
@@ -147,8 +185,8 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe your event..."
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 resize-none"
+                placeholder="Describe this meaningful moment..."
+                className="border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 resize-none"
                 rows={3}
               />
             </div>
@@ -164,7 +202,7 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  className="border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
                   required
                 />
               </div>
@@ -178,7 +216,7 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
                   type="time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  className="border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
                   required
                 />
               </div>
@@ -188,13 +226,13 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                Venue
+                Sacred Space / Venue
               </label>
               <Input
                 value={venue}
                 onChange={(e) => setVenue(e.target.value)}
-                placeholder="Enter venue or location..."
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                placeholder="Where will this moment unfold..."
+                className="border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
                 required
               />
             </div>
@@ -202,24 +240,24 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
             {/* Requirements */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Requirements
+                Requirements & Preparations
               </label>
               <div className="flex gap-2 mb-3">
                 <Input
                   value={newRequirement}
                   onChange={(e) => setNewRequirement(e.target.value)}
                   placeholder="Add a requirement..."
-                  className="flex-1 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  className="flex-1 border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddRequirement())}
                 />
-                <Button type="button" onClick={handleAddRequirement} variant="outline">
+                <Button type="button" onClick={handleAddRequirement} variant="outline" className="border-indigo-200 text-indigo-700">
                   Add
                 </Button>
               </div>
               {requirements.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {requirements.map((req) => (
-                    <Badge key={req} variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer" onClick={() => handleRemoveRequirement(req)}>
+                    <Badge key={req} variant="secondary" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer" onClick={() => handleRemoveRequirement(req)}>
                       {req} ×
                     </Badge>
                   ))}
@@ -231,13 +269,13 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                Notes
+                Sacred Notes & Reflections
               </label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any additional notes or reminders..."
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 resize-none"
+                placeholder="Add your thoughts, intentions, or reminders for this moment..."
+                className="border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 resize-none"
                 rows={3}
               />
             </div>
@@ -246,9 +284,9 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                 <Paperclip className="w-4 h-4" />
-                Attachments
+                Sacred Attachments
               </label>
-              <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+              <div className="border-2 border-dashed border-indigo-200 rounded-lg p-4 text-center hover:border-indigo-400 transition-colors bg-gradient-to-br from-indigo-25 to-purple-25">
                 <input
                   type="file"
                   multiple
@@ -261,16 +299,16 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
                   htmlFor="event-file-upload"
                   className="cursor-pointer flex flex-col items-center gap-2"
                 >
-                  <Paperclip className="w-8 h-8 text-gray-400" />
-                  <span className="text-gray-600">Click to upload event files</span>
-                  <span className="text-xs text-gray-400">Documents, images, tickets, confirmations</span>
+                  <Paperclip className="w-8 h-8 text-indigo-400" />
+                  <span className="text-indigo-700 font-medium">Upload meaningful files</span>
+                  <span className="text-xs text-indigo-500">Documents, images, tickets, or any sacred memories</span>
                 </label>
               </div>
               {attachments.length > 0 && (
                 <div className="mt-3 space-y-1">
                   {attachments.map((file, index) => (
                     <div key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                      <Paperclip className="w-3 h-3" />
+                      <Paperclip className="w-3 h-3 text-indigo-500" />
                       {file}
                     </div>
                   ))}
@@ -284,17 +322,17 @@ const EventForm: React.FC<EventFormProps> = ({ onSave, onCancel }) => {
                 type="button"
                 variant="outline"
                 onClick={onCancel}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 border-gray-200 text-gray-700 hover:bg-gray-50"
               >
                 <X className="w-4 h-4" />
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white flex items-center gap-2"
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white flex items-center gap-2 shadow-lg"
               >
                 <Save className="w-4 h-4" />
-                Save Event
+                {editingEvent ? 'Update Event' : 'Save Event'}
               </Button>
             </div>
           </form>
