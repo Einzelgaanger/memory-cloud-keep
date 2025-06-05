@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Calendar, MapPin, Clock, FileText, CheckCircle2, CalendarDays, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -55,7 +54,16 @@ const EventsPage: React.FC = () => {
         return;
       }
 
-      setEvents(data || []);
+      // Type cast the data to ensure proper types
+      const typedEvents: Event[] = (data || []).map(event => ({
+        ...event,
+        priority: event.priority as 'low' | 'medium' | 'high',
+        status: event.status as 'pending' | 'completed' | 'rescheduled',
+        requirements: event.requirements || [],
+        attachments: event.attachments || []
+      }));
+
+      setEvents(typedEvents);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -87,7 +95,15 @@ const EventsPage: React.FC = () => {
         return;
       }
 
-      setEvents([data, ...events]);
+      const typedEvent: Event = {
+        ...data,
+        priority: data.priority as 'low' | 'medium' | 'high',
+        status: data.status as 'pending' | 'completed' | 'rescheduled',
+        requirements: data.requirements || [],
+        attachments: data.attachments || []
+      };
+
+      setEvents([typedEvent, ...events]);
       setShowForm(false);
       toast({
         title: "Event created!",
@@ -122,7 +138,15 @@ const EventsPage: React.FC = () => {
         return;
       }
 
-      setEvents(events.map(event => event.id === editingEvent.id ? data : event));
+      const typedEvent: Event = {
+        ...data,
+        priority: data.priority as 'low' | 'medium' | 'high',
+        status: data.status as 'pending' | 'completed' | 'rescheduled',
+        requirements: data.requirements || [],
+        attachments: data.attachments || []
+      };
+
+      setEvents(events.map(event => event.id === editingEvent.id ? typedEvent : event));
       setShowForm(false);
       setEditingEvent(null);
       toast({
